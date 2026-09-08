@@ -4,7 +4,7 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module.js';
 
-describe('AppController (e2e)', () => {
+describe('E2E JWT Sample', () => {
   let app: INestApplication<App>;
 
   beforeEach(async () => {
@@ -16,11 +16,21 @@ describe('AppController (e2e)', () => {
     await app.init();
   });
 
-  it('/ (GET)', () => {
+  it('should get a JWT then successfully make a call', async () => {
+    const loginReq = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ username: 'john', password: 'changeme' })
+      .expect(200);
+
+    const token = loginReq.body.access_token;
     return request(app.getHttpServer())
-      .get('/')
+      .get('/auth/profile')
+      .set('Authorization', 'Bearer ' + token)
       .expect(200)
-      .expect('Hello World!');
+      .expect(({ body }) => {
+        expect(body.sub).toEqual(1);
+        expect(body.username).toEqual('john');
+      });
   });
 
   afterEach(async () => {
