@@ -41,6 +41,10 @@ export class AuthController {
   @Post('register')
   @Public()
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Register a new user' })
+  @ApiResponse({ status: 201, description: 'User successfully created.' })
+  @ApiResponse({ status: 400, description: 'Bad Request (validation failed).' })
+  @ApiResponse({ status: 409, description: 'Conflict (Email already in use).' })
   register(@Body() dto: CreateUserDto) {
     return this.authService.register(dto);
   }
@@ -54,11 +58,10 @@ export class AuthController {
     schema: {
       type: 'object',
       properties: {
-        username: { type: 'string', example: 'john' },
-        password: { type: 'string', example: 'changeme' },
-        role: { type: 'string', example: 'Admin' }
+        email: { type: 'string', example: 'john@example.com' },
+        password: { type: 'string', example: 'password123' }
       },
-      required: ['username', 'password', 'role'],
+      required: ['email', 'password'],
     },
   })
   @ApiResponse({ status: 200, description: 'Return JWT access token.' })
@@ -67,8 +70,8 @@ export class AuthController {
     return this.authService.login(req.user);
   }
 
-  @Public()
-  @UseGuards(LocalAuthGuard)
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'User logout' })
