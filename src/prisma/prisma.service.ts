@@ -1,7 +1,7 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
-import { PrismaClient } from './generated/prisma/index.js';
+import { PrismaClient } from '../generated/prisma/index.js';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
@@ -10,7 +10,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   constructor() {
     const pool = new Pool({
       connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false }, // required for Aiven
+      ssl: { rejectUnauthorized: false }
     });
 
     const adapter = new PrismaPg(pool);

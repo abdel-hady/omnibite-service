@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   HttpCode,
@@ -13,11 +14,14 @@ import { Public } from './decorators/public.decorator.js';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { LocalAuthGuard } from './guards/local-auth.guard.js';
 import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
+import { CreateUserDto } from '../users/dto/create-user.dto.js';
+import { User } from '../generated/prisma/index.js';
 
 interface RequestWithUser {
   user: {
-    userId: string;
-    username: string;
+    id: string;
+    email: string;
+    role?: string;
   };
   headers: {
     authorization: string;
@@ -26,16 +30,20 @@ interface RequestWithUser {
 }
 
 interface RequestWithLoginUser {
-  user: {
-  username: string;
-  password: string;
-  }
+  user: Omit<User, 'passwordHash'>; // User object from LocalStrategy
 }
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
+  
+  @Post('register')
+  @Public()
+  @HttpCode(HttpStatus.CREATED)
+  register(@Body() dto: CreateUserDto) {
+    return this.authService.register(dto);
+  }
 
   @Public()
   @UseGuards(LocalAuthGuard)
@@ -66,8 +74,8 @@ export class AuthController {
   @ApiOperation({ summary: 'User logout' })
   @ApiResponse({ status: 200, description: 'Return success message.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async logout(@Request() req: RequestWithUser) {
-    return this.authService.logout(req.user.userId);
+  async logout() {
+    return this.authService.logout();
   }  
 
   @ApiBearerAuth()

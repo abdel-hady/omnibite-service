@@ -34,6 +34,12 @@ A robust and scalable backend service for Omnibite, built with [NestJS](https://
    ```bash
    npx prisma generate
    npx prisma migrate dev
+
+   # push database schema
+   npx prisma db push
+
+   # seed database
+   npx prisma db seed
    ```
 
 ## Running the Application
