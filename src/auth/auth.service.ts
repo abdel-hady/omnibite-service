@@ -1,9 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { User } from '../generated/prisma/index.js';
 import { CreateUserDto } from '../users/dto/create-user.dto.js';
+import bcrypt from 'bcryptjs';
+import { LoginDto } from './dto/login.dto.js';
 
 @Injectable()
 export class AuthService {
@@ -28,11 +30,22 @@ export class AuthService {
     return null;
   }
 
-  async login(user: Omit<User, 'passwordHash'>) {
-    const payload = { email: user.email, sub: user.id, role: user.role };
-    return {
-      access_token: await this.jwtService.signAsync(payload),
+  async login(dto: LoginDto) {
+    const user = await this.usersService.findByEmail(dto.email);
+    if (!user) throw new UnauthorizedException('Invalid credentials');
+
+    const passwordMatch = await bcrypt.compare(dto.password, user.passwordHash);
+    if (!passwordMatch) throw new UnauthorizedException('Invalid credentials');
+
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
     };
+    const token = await this.jwtService.signAsync(payload);
+
+    const { passwordHash, ...safeUser } = user;
+    return { accessToken: token, user: safeUser };
   }
 
   async logout(): Promise<{ message: string }> {

@@ -5,17 +5,17 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Res,
   Request,
   UseGuards,
 } from '@nestjs/common';
+import express from 'express';
 import { AuthService } from './auth.service.js';
 import { Public } from './decorators/public.decorator.js';
-
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { LocalAuthGuard } from './guards/local-auth.guard.js';
 import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
 import { CreateUserDto } from '../users/dto/create-user.dto.js';
-import { User } from '../generated/prisma/index.js';
+import { LoginDto } from './dto/login.dto.js';
 
 interface RequestWithUser {
   user: {
@@ -27,10 +27,6 @@ interface RequestWithUser {
     authorization: string;
     [key: string]: string | string[] | undefined;
   };
-}
-
-interface RequestWithLoginUser {
-  user: Omit<User, 'passwordHash'>; // User object from LocalStrategy
 }
 
 @ApiTags('auth')
@@ -50,24 +46,24 @@ export class AuthController {
   }
 
   @Public()
-  @UseGuards(LocalAuthGuard)
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'User login' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        email: { type: 'string', example: 'john@example.com' },
-        password: { type: 'string', example: 'password123' }
-      },
-      required: ['email', 'password'],
-    },
-  })
+  @ApiBody({ type: LoginDto })
   @ApiResponse({ status: 200, description: 'Return JWT access token.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async login(@Request() req: RequestWithLoginUser) {
-    return this.authService.login(req.user);
+  async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: express.Response) {
+    const result = await this.authService.login(dto);
+
+    // Set httpOnly cookie for browser clients
+    res.cookie('auth_token', result.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms, matches JWT expiry
+    });
+
+    return result;
   }
 
   @ApiBearerAuth()
@@ -77,9 +73,10 @@ export class AuthController {
   @ApiOperation({ summary: 'User logout' })
   @ApiResponse({ status: 200, description: 'Return success message.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async logout() {
-    return this.authService.logout();
-  }  
+  logout(@Res({ passthrough: true }) res: express.Response) {
+    res.clearCookie('auth_token');
+    return { message: 'Logged out successfully' };
+  }
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)

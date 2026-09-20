@@ -7,7 +7,7 @@ import { User } from '../../generated/prisma/index.js';
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(private authService: AuthService) {
-    super();
+    super({ usernameField: 'email' });
   }
 
   async validate(username: string, password: string): Promise<Omit<User, 'passwordHash'>> {
