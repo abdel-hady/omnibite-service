@@ -1,17 +1,9 @@
-import "dotenv/config";
-import { defineConfig } from "@prisma/cli-engine";
-import { defineConfig as definePostgresConfig } from "@prisma/orm-postgres/config";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
-
-const projectRoot = dirname(fileURLToPath(import.meta.url));
+import { defineConfig } from 'prisma/config';
+import 'dotenv/config';
 
 export default defineConfig({
-  orm: definePostgresConfig({
-    contract: "prisma/contract.prisma",
-    output: resolve(projectRoot, "generated/prisma"),
-    db: {
-      connection: process.env["DATABASE_URL"],
-    }
-  }),
+  schema: 'prisma/schema.prisma',
+  datasource: {
+    url: process.env.DATABASE_URL!,
+  },
 });
