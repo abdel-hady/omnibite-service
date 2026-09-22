@@ -6,12 +6,14 @@ import { AppService } from './app.service.js';
 import { AuthModule } from './auth/auth.module.js';
 import { UsersModule } from './users/users.module.js';
 import { JwtAuthGuard } from './auth/guards/auth.guard.js';
+import { RestaurantsModule } from './restaurants/restaurants.module.js';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     AuthModule,
     UsersModule,
+    RestaurantsModule,
   ],
   controllers: [AppController],
   providers: [
