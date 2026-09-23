@@ -47,6 +47,6 @@ export class OrdersService {
       });
     });
   
-    return { orderId: order.id, status: order.status };
+    return { orderId: order.id, status: order.status, total: dto.items.reduce((sum, item) => sum + (itemMap.get(item.menuItemId)!.price * item.quantity), 0) };
   }
 }
