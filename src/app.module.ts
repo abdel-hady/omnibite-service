@@ -8,6 +8,7 @@ import { UsersModule } from './users/users.module.js';
 import { JwtAuthGuard } from './auth/guards/auth.guard.js';
 import { RestaurantsModule } from './restaurants/restaurants.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
+import { OrdersModule } from './orders/orders.module.js';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { PrismaModule } from './prisma/prisma.module.js';
     AuthModule,
     UsersModule,
     RestaurantsModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [
