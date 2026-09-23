@@ -1,32 +1,20 @@
 import { IsOptional, IsString, IsInt, Min } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class RestaurantQueryDto {
-  @ApiProperty({
-    description: 'Cuisine of the restaurant',
-    example: 'Japanese',
-    required: false
-  })
+  @ApiPropertyOptional({ example: 'Levantine' })
   @IsOptional()
   @IsString()
   cuisine?: string;
 
-  @ApiProperty({
-    description: 'Page number',
-    example: 1,
-    required: false
-  })
+  @ApiPropertyOptional({ example: 1 })
   @Type(() => Number)
   @IsInt()
   @Min(1)
   page?: number = 1;
 
-  @ApiProperty({
-    description: 'Limit of the restaurant',
-    example: 10,
-    required: false
-  })
+  @ApiPropertyOptional({ example: 12 })
   @IsOptional()
   @Type(() => Number)
   @IsInt()

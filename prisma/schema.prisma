@@ -61,24 +61,26 @@ model MenuItem {
 }
 
 model Order {
-  id              String      @id @default(uuid())
-  customer        User        @relation(fields:[customerId], references:[id])
+  id              String      @id @default(cuid())
   customerId      String
-  restaurant      Restaurant  @relation(fields:[restaurantId], references:[id])
   restaurantId    String
   status          OrderStatus @default(PENDING)
   deliveryAddress Json
   createdAt       DateTime    @default(now())
-  items           OrderItem[]
+
+  customer   User       @relation(fields: [customerId], references: [id])
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  items      OrderItem[]
 }
 
 model OrderItem {
-  id         String   @id @default(uuid())
-  order      Order    @relation(fields:[orderId], references:[id])
-  orderId    String
-  menuItem   MenuItem @relation(fields:[menuItemId], references:[id])
-  menuItemId String
-  name       String // snapshot at time of order
-  price      Float // snapshot at time of order
-  quantity   Int
+  id          String  @id @default(cuid())
+  orderId     String
+  menuItemId  String
+  name        String
+  price       Decimal
+  quantity    Int
+
+  order    Order    @relation(fields: [orderId], references: [id])
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id])
 }
