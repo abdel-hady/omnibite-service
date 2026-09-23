@@ -1,34 +1,27 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { RestaurantsService } from './restaurants.service.js';
-import { CreateRestaurantDto } from './dto/create-restaurant.dto.js';
-import { UpdateRestaurantDto } from './dto/update-restaurant.dto.js';
+import { RestaurantQueryDto } from './dto/restaurant-query.dto.js';
+import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('restaurants')
 @Controller('restaurants')
 export class RestaurantsController {
-  constructor(private readonly restaurantsService: RestaurantsService) {}
-
-  @Post()
-  create(@Body() createRestaurantDto: CreateRestaurantDto) {
-    return this.restaurantsService.create(createRestaurantDto);
-  }
+  constructor(private restaurantsService: RestaurantsService) {}
 
   @Get()
-  findAll() {
-    return this.restaurantsService.findAll();
+  @ApiOperation({ summary: 'Get all restaurants' })
+  @ApiResponse({ status: 200, description: 'Return all restaurants.' })
+  @ApiResponse({ status: 400, description: 'Bad Request (validation failed).' })
+  findAll(@Query() query: RestaurantQueryDto) {
+    return this.restaurantsService.findAll(query);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.restaurantsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRestaurantDto: UpdateRestaurantDto) {
-    return this.restaurantsService.update(+id, updateRestaurantDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.restaurantsService.remove(+id);
+  @Get(':slug')
+  @ApiOperation({ summary: 'Get restaurant by slug' })
+  @ApiParam({ name: 'slug', description: 'Restaurant slug' })
+  @ApiResponse({ status: 200, description: 'Return restaurant profile.' })
+  @ApiResponse({ status: 404, description: 'Restaurant not found.' })
+  findOne(@Param('slug') slug: string) {
+    return this.restaurantsService.findBySlug(slug);
   }
 }

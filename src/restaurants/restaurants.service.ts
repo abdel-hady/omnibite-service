@@ -1,26 +1,87 @@
-import { Injectable } from '@nestjs/common';
-import { CreateRestaurantDto } from './dto/create-restaurant.dto.js';
-import { UpdateRestaurantDto } from './dto/update-restaurant.dto.js';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { RestaurantQueryDto } from './dto/restaurant-query.dto.js';
 
 @Injectable()
 export class RestaurantsService {
-  create(createRestaurantDto: CreateRestaurantDto) {
-    return 'This action adds a new restaurant';
+  constructor(private prisma: PrismaService) {}
+
+  async findAll(query: RestaurantQueryDto) {
+    const { cuisine, page = 1, limit = 12 } = query;
+    const skip = (page - 1) * limit;
+
+    const where = {
+      isActive: true,
+      ...(cuisine ? { cuisine: { contains: cuisine, mode: 'insensitive' as const } } : {}),
+    };
+
+    const [restaurants, total] = await this.prisma.$transaction([
+      this.prisma.restaurant.findMany({
+        where,
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          slug: true,
+          name: true,
+          cuisine: true,
+          rating: true,
+          deliveryMin: true,
+          deliveryMax: true,
+          bannerImage: true,
+        },
+        orderBy: { rating: 'desc' },
+      }),
+      this.prisma.restaurant.count({ where }),
+    ]);
+
+    return {
+      data: restaurants,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
-  findAll() {
-    return `This action returns all restaurants`;
-  }
+  async findBySlug(slug: string) {
+    const restaurant = await this.prisma.restaurant.findUnique({
+      where: { slug },
+      include: {
+        menuItems: {
+          where: { isAvailable: true },
+          orderBy: { category: 'asc' },
+        },
+      },
+    });
 
-  findOne(id: number) {
-    return `This action returns a #${id} restaurant`;
-  }
+    if (!restaurant) {
+      throw new NotFoundException(`Restaurant "${slug}" not found`);
+    }
 
-  update(id: number, updateRestaurantDto: UpdateRestaurantDto) {
-    return `This action updates a #${id} restaurant`;
-  }
+    // Group menu items by category
+    const menuByCategory = restaurant.menuItems.reduce(
+      (acc, item) => {
+        if (!acc[item.category]) acc[item.category] = [];
+        acc[item.category].push(item);
+        return acc;
+      },
+      {} as Record<string, typeof restaurant.menuItems>,
+    );
 
-  remove(id: number) {
-    return `This action removes a #${id} restaurant`;
+    return {
+      id: restaurant.id,
+      slug: restaurant.slug,
+      name: restaurant.name,
+      description: restaurant.description,
+      cuisine: restaurant.cuisine,
+      rating: restaurant.rating,
+      deliveryMin: restaurant.deliveryMin,
+      deliveryMax: restaurant.deliveryMax,
+      bannerImage: restaurant.bannerImage,
+      menu: menuByCategory,
+    };
   }
 }

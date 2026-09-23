@@ -32,26 +32,31 @@ model User {
 }
 
 model Restaurant {
-  id          String     @id @default(uuid())
-  name        String
+  id          String     @id @default(cuid())
   slug        String     @unique
+  name        String
+  description String?
   cuisine     String
+  bannerImage String?
   rating      Float      @default(0)
-  deliveryMin Int        @default(20)
-  deliveryMax Int        @default(35)
+  deliveryMin Int        @default(20) // minutes
+  deliveryMax Int        @default(40)
+  isActive    Boolean    @default(true)
   menuItems   MenuItem[]
   orders      Order[]
+  createdAt   DateTime   @default(now())
 }
 
 model MenuItem {
-  id           String      @id @default(uuid())
-  restaurant   Restaurant  @relation(fields:[restaurantId], references:[id])
+  id           String     @id @default(cuid())
   restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
   name         String
-  description  String
+  description  String?
   price        Float
-  category     String
-  isAvailable  Boolean     @default(true)
+  category     String     // "Starters", "Mains", "Desserts"
+  image        String?
+  isAvailable  Boolean    @default(true)
   orderItems   OrderItem[]
 }
 

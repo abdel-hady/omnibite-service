@@ -40,8 +40,15 @@ export async function main() {
   const basilEmber = await prisma.restaurant.upsert({
     where: { slug: 'basil-ember-kitchen' },
     update: {},
-    create: { name: 'Basil & Ember Kitchen', slug: 'basil-ember-kitchen', cuisine: 'Levantine', rating: 4.8, deliveryMin: 25, deliveryMax: 35 },
-  })
+    create: {
+      slug: 'basil-ember-kitchen',
+      name: 'Basil & Ember Kitchen',
+      cuisine: 'Levantine',
+      rating: 4.8,
+      deliveryMin: 25,
+      deliveryMax: 35
+    },
+  });
 
   await prisma.restaurant.upsert({
     where: { slug: 'nonnas-table' },
