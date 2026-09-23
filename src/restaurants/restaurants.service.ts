@@ -51,7 +51,6 @@ export class RestaurantsService {
       where: { slug },
       include: {
         menuItems: {
-          where: { isAvailable: true },
           orderBy: { category: 'asc' },
         },
       },
