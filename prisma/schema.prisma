@@ -29,6 +29,7 @@ model User {
   role         UserRole @default(CUSTOMER)
   createdAt    DateTime @default(now())
   orders       Order[]
+  restaurantId String? @unique
 }
 
 model Restaurant {
@@ -45,6 +46,7 @@ model Restaurant {
   menuItems   MenuItem[]
   orders      Order[]
   createdAt   DateTime   @default(now())
+  ownerId     String?    @unique
 }
 
 model MenuItem {

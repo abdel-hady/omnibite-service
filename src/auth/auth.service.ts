@@ -13,7 +13,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private readonly prisma: PrismaService
-  ) {}
+  ) { }
 
   async register(dto: CreateUserDto) {
     return this.usersService.create(dto);
@@ -23,7 +23,7 @@ export class AuthService {
   async validateUser(email: string, pass: string): Promise<Omit<User, 'passwordHash'> | null> {
     const user = await this.usersService.findByEmail(email);
     if (user && user.passwordHash === pass) {
-       
+
       const { passwordHash, ...result } = user;
       return result;
     }

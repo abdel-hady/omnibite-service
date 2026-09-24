@@ -21,7 +21,7 @@ export async function main() {
     create: { email: 'amina@example.com', name: 'Amina Yusuf', passwordHash, role: UserRole.CUSTOMER },
   })
 
-  await prisma.user.upsert({
+  const restaurant = await prisma.user.upsert({
     where: { email: 'karim@basilkitchen.com' },
     update: {},
     create: { email: 'karim@basilkitchen.com', name: 'Karim Haddad', passwordHash, role: UserRole.RESTAURANT },
@@ -39,27 +39,34 @@ export async function main() {
 
   const basilEmber = await prisma.restaurant.upsert({
     where: { slug: 'basil-ember-kitchen' },
-    update: {},
+    update: { ownerId: restaurant.id },
     create: {
       slug: 'basil-ember-kitchen',
       name: 'Basil & Ember Kitchen',
       cuisine: 'Levantine',
       rating: 4.8,
       deliveryMin: 25,
-      deliveryMax: 35
+      deliveryMax: 35,
+      ownerId: restaurant.id
     },
   });
 
-  await prisma.restaurant.upsert({
+  const nonnasTable = await prisma.restaurant.upsert({
     where: { slug: 'nonnas-table' },
     update: {},
     create: { name: "Nonna's Table", slug: 'nonnas-table', cuisine: 'Italian', rating: 4.6, deliveryMin: 30, deliveryMax: 40 },
   })
 
-  await prisma.restaurant.upsert({
+  const sakuraBowl = await prisma.restaurant.upsert({
     where: { slug: 'sakura-bowl' },
     update: {},
     create: { name: 'Sakura Bowl', slug: 'sakura-bowl', cuisine: 'Japanese', rating: 4.9, deliveryMin: 20, deliveryMax: 30 },
+  })
+
+  // Update users to have restaurantId
+  await prisma.user.update({
+    where: { id: restaurant.id },
+    data: { restaurantId: basilEmber.id }
   })
 
   console.log('✅ Restaurants seeded')

@@ -1,26 +1,44 @@
-import { Injectable } from '@nestjs/common';
-import { CreateVendorDto } from './dto/create-vendor.dto.js';
-import { UpdateVendorDto } from './dto/update-vendor.dto.js';
+import { Injectable, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { OrderStatus } from '../generated/prisma/index.js';
 
 @Injectable()
 export class VendorService {
-  create(createVendorDto: CreateVendorDto) {
-    return 'This action adds a new vendor';
+  constructor(private prisma: PrismaService) { }
+
+  async getOrders(restaurantId: string) {
+    return this.prisma.order.findMany({
+      where: { restaurantId },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        items: true,
+        customer: { select: { id: true, name: true, email: true } },
+      },
+    });
   }
 
-  findAll() {
-    return `This action returns all vendor`;
-  }
+  async updateOrderStatus(orderId: string, restaurantId: string, status: OrderStatus) {
+    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
 
-  findOne(id: number) {
-    return `This action returns a #${id} vendor`;
-  }
+    if (!order) throw new NotFoundException('Order not found');
+    if (order.restaurantId !== restaurantId) throw new ForbiddenException('Access denied');
 
-  update(id: number, updateVendorDto: UpdateVendorDto) {
-    return `This action updates a #${id} vendor`;
-  }
+    const VALID_TRANSITIONS = {
+      PENDING: ['CONFIRMED'],
+      CONFIRMED: ['READY'],
+      READY: [],
+    };
 
-  remove(id: number) {
-    return `This action removes a #${id} vendor`;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    if (!VALID_TRANSITIONS[order.status]?.includes(status)) {
+      throw new BadRequestException(`Cannot transition from ${order.status} to ${status}`);
+    }
+
+    return this.prisma.order.update({
+      where: { id: orderId },
+      data: { status },
+      include: { items: true },
+    });
   }
 }
