@@ -9,10 +9,12 @@ import { JwtAuthGuard } from './guards/auth.guard.js';
 import { UsersModule } from '../users/users.module.js';
 import { LocalStrategy } from './strategies/local.strategy.js';
 import { LocalAuthGuard } from './guards/local-auth.guard.js';
+import { RestaurantsModule } from '../restaurants/restaurants.module.js';
 
 @Module({
   imports: [
     UsersModule,
+    RestaurantsModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     ConfigModule,
     JwtModule.registerAsync({
@@ -28,4 +30,4 @@ import { LocalAuthGuard } from './guards/local-auth.guard.js';
   providers: [AuthService, JwtStrategy, JwtAuthGuard, LocalStrategy, LocalAuthGuard],
   exports: [JwtAuthGuard, PassportModule, LocalAuthGuard], // so other modules can use it
 })
-export class AuthModule {}
+export class AuthModule { }

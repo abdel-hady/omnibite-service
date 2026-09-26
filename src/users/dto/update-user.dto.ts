@@ -13,4 +13,9 @@ export class UpdateUserDto {
   @MinLength(8)
   @IsOptional()
   password?: string;
+
+  @ApiPropertyOptional({ example: 'restaurant-id' })
+  @IsString()
+  @IsOptional()
+  restaurantId?: string;
 }

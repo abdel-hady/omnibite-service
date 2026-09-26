@@ -74,6 +74,7 @@ export class UsersService {
       where: { id },
       data: {
         ...(dto.name && { name: dto.name }),
+        ...(dto.restaurantId !== undefined && { restaurantId: dto.restaurantId }),
         passwordHash,
       },
     });
@@ -81,6 +82,7 @@ export class UsersService {
     return this.sanitize(updated);
   }
 
+  // TODO: Soft delete user for record keeping
   async remove(id: string) {
     await this.findById(id); // throws 404 if not found
     await this.prisma.user.delete({ where: { id } });

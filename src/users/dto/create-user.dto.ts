@@ -17,8 +17,13 @@ export class CreateUserDto {
   @IsNotEmpty()
   name: string;
 
-  @ApiPropertyOptional({ enum: UserRole, example: UserRole.CUSTOMER })
+  @ApiPropertyOptional({ enum: UserRole, example: UserRole.RESTAURANT })
   @IsEnum(UserRole)
   @IsOptional()
   role?: UserRole;
+
+  @ApiPropertyOptional({ example: 'Smash Burger' })
+  @IsString()
+  @IsOptional()
+  restaurantName?: string;
 }

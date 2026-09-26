@@ -23,6 +23,10 @@ const mockUsersService: any = {
   create: jest.fn(),
 };
 
+const mockRestaurantsService: any = {
+  create: jest.fn(),
+};
+
 describe('AuthService', () => {
   let service: AuthService;
 
@@ -40,11 +44,7 @@ describe('AuthService', () => {
     jest.clearAllMocks();
   });
 
-  // ─── TASK 04 + TASK 14: Register ───────────────────────────────────────────
-
-  // TDD: Given a new email and password, when register() is called,
-  // then the password is stored hashed and a user object (without password) is returned.
-  it('register: delegates to UsersService to create a new user', async () => {
+  it('register: delegates to UsersService to create a new user (Customer)', async () => {
     mockUsersService.create.mockResolvedValue({
       id: '1',
       email: 'test@example.com',
@@ -66,6 +66,40 @@ describe('AuthService', () => {
       password: 'Password123!',
       name: 'Test User',
       role: 'CUSTOMER',
+    });
+
+    expect(result.email).toBe('test@example.com');
+  });
+
+  it('register: delegates to UsersService to create a new user (Restaurant)', async () => {
+    mockUsersService.create.mockResolvedValue({
+      id: '1',
+      email: 'test@example.com',
+      name: 'Test User',
+      role: 'RESTAURANT',
+      createdAt: new Date(),
+      restaurantId: null,
+    });
+
+    const result = await service.register({
+      email: 'test@example.com',
+      password: 'Password123!',
+      name: 'Test User',
+      role: 'RESTAURANT',
+      restaurantName: 'Test Restaurant',
+    });
+
+    expect(mockUsersService.create).toHaveBeenCalledWith({
+      email: 'test@example.com',
+      password: 'Password123!',
+      name: 'Test User',
+      role: 'RESTAURANT',
+    });
+
+    expect(mockRestaurantsService.create).toHaveBeenCalledWith({
+      name: 'Test Restaurant',
+      slug: 'test-restaurant',
+      ownerId: '1',
     });
 
     expect(result.email).toBe('test@example.com');

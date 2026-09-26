@@ -37,7 +37,7 @@ model Restaurant {
   slug        String     @unique
   name        String
   description String?
-  cuisine     String
+  cuisine     String?
   bannerImage String?
   rating      Float      @default(0)
   deliveryMin Int        @default(20) // minutes

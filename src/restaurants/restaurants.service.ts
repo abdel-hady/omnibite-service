@@ -1,10 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RestaurantQueryDto } from './dto/restaurant-query.dto.js';
+import { CreateRestaurantDto } from './dto/create-restaurant.dto.js';
 
 @Injectable()
 export class RestaurantsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
+
+  async create(dto: CreateRestaurantDto) {
+    return this.prisma.restaurant.create({ data: dto });
+  }
 
   async findAll(query: RestaurantQueryDto) {
     const { cuisine, page = 1, limit = 12 } = query;
