@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { UnprocessableEntityException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
@@ -12,13 +12,13 @@ export class OrdersService {
     const menuItems = await this.prisma.menuItem.findMany({
       where: {
         id: { in: menuItemIds },
-        restaurantId: dto.restaurantId,
         isAvailable: true,
       },
     });
 
-    if (menuItems.length !== menuItemIds.length) {
-      throw new BadRequestException('One or more items are invalid or unavailable');
+    const hasInvalidRestaurant = menuItems.some(m => m.restaurantId !== dto.restaurantId);
+    if (hasInvalidRestaurant || menuItems.length !== menuItemIds.length) {
+      throw new UnprocessableEntityException('One or more items are invalid or unavailable');
     }
 
     const itemMap = new Map(menuItems.map(m => [m.id, m]));
