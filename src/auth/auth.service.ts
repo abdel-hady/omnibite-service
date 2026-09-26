@@ -6,6 +6,7 @@ import { User } from '../generated/prisma/index.js';
 import { CreateUserDto } from '../users/dto/create-user.dto.js';
 import bcrypt from 'bcryptjs';
 import { LoginDto } from './dto/login.dto.js';
+import express from 'express';
 
 @Injectable()
 export class AuthService {
@@ -48,7 +49,8 @@ export class AuthService {
     return { accessToken: token, user: safeUser };
   }
 
-  async logout(): Promise<{ message: string }> {
+  async logout(res: express.Response): Promise<{ message: string }> {
+    res.clearCookie('auth_token');
     return { message: 'Logged out successfully' };
   }
 }

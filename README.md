@@ -62,7 +62,7 @@ npm run start:prod
 npm run test
 
 # watch mode
-npm run test:watch
+npm test -- --watch
 
 # test coverage
 npm run test:cov

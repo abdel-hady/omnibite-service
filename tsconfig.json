@@ -18,8 +18,9 @@
     "strict": true,
     "strictNullChecks": true,
     "strictPropertyInitialization": false,
+    "rootDir": "./",
     "types": [
-      "vitest/globals",
+      "jest",
       "node"
     ]
   }

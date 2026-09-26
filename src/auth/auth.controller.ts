@@ -32,8 +32,8 @@ interface RequestWithUser {
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
-  
+  constructor(private readonly authService: AuthService) { }
+
   @Post('register')
   @Public()
   @HttpCode(HttpStatus.CREATED)
@@ -74,8 +74,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Return success message.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   logout(@Res({ passthrough: true }) res: express.Response) {
-    res.clearCookie('auth_token');
-    return { message: 'Logged out successfully' };
+    return this.authService.logout(res);
   }
 
   @ApiBearerAuth()
