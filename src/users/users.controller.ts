@@ -21,6 +21,7 @@ export interface RequestWithUser {
   user: {
     id: string;
     role: UserRole;
+    restaurantId?: string;
   };
 }
 

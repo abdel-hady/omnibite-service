@@ -20,7 +20,7 @@ export class VendorController {
   @ApiResponse({ status: 200, description: 'Return all orders for the vendor.' })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   getOrders(@Req() req: RequestWithUser) {
-    return this.vendorService.getOrders(req.user.id);
+    return this.vendorService.getOrders(req.user.restaurantId!);
   }
 
   @Patch('orders/:id')
