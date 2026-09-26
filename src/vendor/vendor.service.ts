@@ -1,4 +1,4 @@
-import { Injectable, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, ForbiddenException, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { OrderStatus } from '../generated/prisma/index.js';
 
@@ -32,7 +32,7 @@ export class VendorService {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     if (!VALID_TRANSITIONS[order.status]?.includes(status)) {
-      throw new BadRequestException(`Cannot transition from ${order.status} to ${status}`);
+      throw new UnprocessableEntityException(`Cannot transition from ${order.status} to ${status}`);
     }
 
     return this.prisma.order.update({
